@@ -2,10 +2,9 @@ const { ApiClient, requests } = require('recombee-api-client');
 const { AddItemProperty } = requests;
 
 
-// valorile din Recombee
 const client = new ApiClient(
-  'gherghe-dev',     
-  'FxYn3YY7f2zjICFSr54mJjLY23LsPiyL0hBz5SVK1Fg5josfBwOAAIMpds05G7oE'
+  'gherghe-dev',     // Database ID
+  'FxYn3YY7f2zjICFSr54mJjLY23LsPiyL0hBz5SVK1Fg5josfBwOAAIMpds05G7oE' // Private Token
 );
 
 async function defineItemProperties() {
@@ -31,3 +30,4 @@ async function defineItemProperties() {
 }
 
 defineItemProperties();
+
