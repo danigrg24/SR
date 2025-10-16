@@ -1,0 +1,8 @@
+{
+  "name": "recombee-project",
+  "version": "1.0.0",
+  "main": "DefineDatasetProperties.js",
+  "dependencies": {
+    "recombee-api-client": "^5.1.1"
+  }
+}
