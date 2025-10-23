@@ -39,7 +39,6 @@ async function defineUserProperties() {
     console.log('Added property: is_premium (boolean)');
     
     console.log('All user properties defined successfully in Recombee!');
-    console.log('Total properties defined: 8');
     
   } catch (error) {
     console.error('Error defining user properties:', error);
