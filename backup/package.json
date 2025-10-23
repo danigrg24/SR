@@ -1,0 +1,9 @@
+{
+  "name": "recombee-project",
+  "version": "1.0.0",
+  "main": "DefineDatasetProperties.js",
+  "dependencies": {
+    "csv-parser": "^3.2.0",
+    "recombee-api-client": "^5.1.1"
+  }
+}
