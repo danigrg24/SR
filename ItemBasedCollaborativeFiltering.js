@@ -21,27 +21,64 @@ class ItemBasedCollaborativeFiltering {
         return new Promise((resolve, reject) => {
             const players = [];
             
-            fs.createReadStream(csvPath)
-                .pipe(csv())
-                .on('data', (row) => {
-                    // Convertește valorile numerice
-                    const numericFields = ['Age', 'MP', 'Min', 'Gls', 'Ast', 'xG', 'xAG'];
-                    numericFields.forEach(field => {
-                        row[field] = parseFloat(row[field]) || 0;
-                    });
-                    
-                    players.push(row);
-                })
-                .on('end', () => {
-                    console.log(`Loaded ${players.length} players from Premier League dataset`);
-                    this.playersData = players;
-                    this._preprocessData();
-                    resolve(true);
-                })
-                .on('error', (error) => {
-                    console.log(`Error loading data: ${error}`);
-                    reject(false);
-                });
+            // Citim CSV-ul manual pentru control complet
+            const csvContent = fs.readFileSync(csvPath, 'utf8');
+            const lines = csvContent.split('\n').filter(line => line.trim() !== '');
+            
+            // Sari peste header-ul și liniile de conflict
+            const dataLines = lines.slice(1).filter(line => 
+                !line.includes('<<<<<<< HEAD') && 
+                !line.includes('=======') && 
+                line.trim() !== ''
+            );
+            
+            console.log(`Processing ${dataLines.length} data lines from CSV`);
+            
+            dataLines.forEach((line, index) => {
+                const columns = line.split(',');
+                
+                // Skip liniile invalide
+                if (columns.length < 25 || !columns[1] || !columns[4]) {
+                    return;
+                }
+                
+                const player = {
+                    Rk: columns[0],
+                    Player: columns[1],
+                    Nation: columns[2],
+                    Pos: columns[3],
+                    Squad: columns[4],
+                    Age: parseFloat(columns[5]) || 0,
+                    Born: columns[6],
+                    MP: parseFloat(columns[7]) || 0,
+                    Starts: parseFloat(columns[8]) || 0,
+                    Min: parseFloat(columns[9]) || 0,
+                    '90s': parseFloat(columns[10]) || 0,
+                    Gls: parseFloat(columns[11]) || 0,    // Coloana 12 = Goluri totale
+                    Ast: parseFloat(columns[12]) || 0,    // Coloana 13 = Assist-uri totale
+                    'G+A': parseFloat(columns[13]) || 0,
+                    'G-PK': parseFloat(columns[14]) || 0,
+                    PK: parseFloat(columns[15]) || 0,
+                    PKatt: parseFloat(columns[16]) || 0,
+                    CrdY: parseFloat(columns[17]) || 0,
+                    CrdR: parseFloat(columns[18]) || 0,
+                    xG: parseFloat(columns[19]) || 0,
+                    npxG: parseFloat(columns[20]) || 0,
+                    xAG: parseFloat(columns[21]) || 0
+                };
+                
+                // Debug pentru jucători cunoscuți
+                if (player.Player.includes('Haaland') || player.Player.includes('Salah') || player.Player.includes('Son')) {
+                    console.log(`${player.Player}: Goals=${player.Gls}, Assists=${player.Ast}, Team=${player.Squad}`);
+                }
+                
+                players.push(player);
+            });
+            
+            console.log(`Loaded ${players.length} players from Premier League dataset`);
+            this.playersData = players;
+            this._preprocessData();
+            resolve(true);
         });
     }
 
@@ -161,12 +198,17 @@ class ItemBasedCollaborativeFiltering {
         const player = this.playersData[playerIdx];
         let baseRating = 0.5;
         
+        // Debug: Verifică valorile pentru primul jucător
+        if (playerIdx < 5) {
+            console.log(`Player ${playerIdx}: ${player.Player}, Goals: ${player.Gls}, Assists: ${player.Ast}, Minutes: ${player.Min}`);
+        }
+        
         // Bonus pentru minute jucate
         if (player.Min > 1000) baseRating += 0.2;
         else if (player.Min > 500) baseRating += 0.1;
         
         // Bonus pentru goluri și assist-uri
-        const goalsAndAssists = player.Gls + player.Ast;
+        const goalsAndAssists = (player.Gls || 0) + (player.Ast || 0);
         if (goalsAndAssists > 10) baseRating += 0.2;
         else if (goalsAndAssists > 5) baseRating += 0.1;
         

@@ -300,7 +300,7 @@ async function main() {
         // Generează matrice de similaritate
         await calculator.generateSimilarityMatrix(15);
         
-        console.log('\n✅ Cosine similarity analysis completed!');
+        console.log('\nCosine similarity analysis completed!');
         
     } catch (error) {
         console.error('Error in similarity calculation:', error);
